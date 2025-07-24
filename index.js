@@ -17,20 +17,13 @@ const PORT = process.env.PORT || 5000;
 
 // Security middleware
 app.use(helmet());
+
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [];
+
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:4173",
-        process.env.CORS_ORIGIN,
-      ].filter(Boolean); // Remove undefined values
-
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
