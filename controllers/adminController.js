@@ -144,15 +144,8 @@ class AdminController {
         });
       }
 
-      // Generate a simple slug from name
-      const slug = productData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-
       const product = new Product({
         ...productData,
-        slug,
       });
 
       console.log("Product model instance:", product);
