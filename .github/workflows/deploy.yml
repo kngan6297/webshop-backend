@@ -23,7 +23,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd /root/server/webshop-backend
-            git pull origin main
+            git pull origin master
             npm install
             pm2 restart backend
           EOF
