@@ -144,41 +144,19 @@ class AdminController {
         });
       }
 
-      // Create slug from name
-      let slug = productData.name
+      // Generate a simple slug from name
+      const slug = productData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-      // Check if slug already exists and make it unique
-      let counter = 1;
-      let originalSlug = slug;
-      let existingProduct = await Product.findOne({ slug });
-      while (existingProduct) {
-        slug = `${originalSlug}-${counter}`;
-        existingProduct = await Product.findOne({ slug });
-        counter++;
-        // Prevent infinite loop
-        if (counter > 100) {
-          slug = `${originalSlug}-${Date.now()}`;
-          break;
-        }
-      }
-
-      // Generate a unique SKU
-      const timestamp = Date.now();
-      const randomSuffix = Math.floor(Math.random() * 1000);
-      const sku = `SKU-${timestamp}-${randomSuffix}`;
-
       const product = new Product({
         ...productData,
         slug,
-        sku,
       });
 
       console.log("Product model instance:", product);
       console.log("Generated slug:", slug);
-      console.log("Generated SKU:", sku);
 
       await product.save();
 
@@ -189,6 +167,21 @@ class AdminController {
       });
     } catch (error) {
       console.error("Error creating product:", error);
+      
+      // Handle duplicate key errors more specifically
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        console.error(`Duplicate key error on field: ${field}`);
+        console.error(`Duplicate value: ${error.keyValue[field]}`);
+        
+        return res.status(400).json({
+          success: false,
+          message: `A product with this ${field} already exists`,
+          field: field,
+          value: error.keyValue[field]
+        });
+      }
+      
       next(error);
     }
   }

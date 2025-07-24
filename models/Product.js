@@ -41,13 +41,10 @@ const productSchema = new mongoose.Schema(
     },
     sku: {
       type: String,
-      unique: true,
       trim: true,
-      sparse: true, // Allow multiple documents with null/undefined values
     },
     slug: {
       type: String,
-      unique: true,
       lowercase: true,
     },
     isActive: {
