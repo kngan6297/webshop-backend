@@ -153,9 +153,16 @@ class AdminController {
       // Check if slug already exists and make it unique
       let counter = 1;
       let originalSlug = slug;
-      while (await Product.findOne({ slug })) {
+      let existingProduct = await Product.findOne({ slug });
+      while (existingProduct) {
         slug = `${originalSlug}-${counter}`;
+        existingProduct = await Product.findOne({ slug });
         counter++;
+        // Prevent infinite loop
+        if (counter > 100) {
+          slug = `${originalSlug}-${Date.now()}`;
+          break;
+        }
       }
 
       // Generate a unique SKU
@@ -170,6 +177,8 @@ class AdminController {
       });
 
       console.log("Product model instance:", product);
+      console.log("Generated slug:", slug);
+      console.log("Generated SKU:", sku);
 
       await product.save();
 

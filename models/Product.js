@@ -107,18 +107,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Generate slug from name before saving
-productSchema.pre("save", function (next) {
-  if (!this.isModified("name")) return next();
-
-  this.slug = this.name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-
-  next();
-});
-
 // Calculate average rating when ratings change
 productSchema.pre("save", function (next) {
   if (this.ratings && this.ratings.length > 0) {
