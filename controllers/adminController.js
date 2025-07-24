@@ -167,21 +167,29 @@ class AdminController {
       });
     } catch (error) {
       console.error("Error creating product:", error);
-      
+
       // Handle duplicate key errors more specifically
       if (error.code === 11000) {
+        console.error("Full error object:", error);
+        console.error("Key pattern:", error.keyPattern);
+        console.error("Key value:", error.keyValue);
+
         const field = Object.keys(error.keyPattern)[0];
         console.error(`Duplicate key error on field: ${field}`);
         console.error(`Duplicate value: ${error.keyValue[field]}`);
-        
+
         return res.status(400).json({
           success: false,
           message: `A product with this ${field} already exists`,
           field: field,
-          value: error.keyValue[field]
+          value: error.keyValue[field],
+          errorDetails: {
+            keyPattern: error.keyPattern,
+            keyValue: error.keyValue,
+          },
         });
       }
-      
+
       next(error);
     }
   }
