@@ -144,9 +144,19 @@ class AdminController {
         });
       }
 
-      const product = new Product({
-        ...productData,
-      });
+      // Create product with minimal data to test
+      const minimalProductData = {
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        category: productData.category,
+        stock: productData.stock,
+        isFeatured: productData.isFeatured || false
+      };
+
+      console.log("Minimal product data:", minimalProductData);
+
+      const product = new Product(minimalProductData);
 
       console.log("Product model instance:", product);
       console.log("Generated slug:", slug);
