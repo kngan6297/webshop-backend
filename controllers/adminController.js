@@ -132,17 +132,44 @@ class AdminController {
   async createProduct(req, res, next) {
     try {
       const productData = req.body;
-      
+
+      console.log("Creating product with data:", productData);
+
+      // Validate category exists
+      const category = await Category.findById(productData.category);
+      if (!category) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID",
+        });
+      }
+
       // Create slug from name
-      const slug = productData.name
+      let slug = productData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
+      // Check if slug already exists and make it unique
+      let counter = 1;
+      let originalSlug = slug;
+      while (await Product.findOne({ slug })) {
+        slug = `${originalSlug}-${counter}`;
+        counter++;
+      }
+
+      // Generate a unique SKU
+      const timestamp = Date.now();
+      const randomSuffix = Math.floor(Math.random() * 1000);
+      const sku = `SKU-${timestamp}-${randomSuffix}`;
+
       const product = new Product({
         ...productData,
         slug,
+        sku,
       });
+
+      console.log("Product model instance:", product);
 
       await product.save();
 
@@ -152,6 +179,7 @@ class AdminController {
         data: product,
       });
     } catch (error) {
+      console.error("Error creating product:", error);
       next(error);
     }
   }
@@ -159,8 +187,11 @@ class AdminController {
   // Get single product
   async getProduct(req, res, next) {
     try {
-      const product = await Product.findById(req.params.id).populate("category", "name");
-      
+      const product = await Product.findById(req.params.id).populate(
+        "category",
+        "name"
+      );
+
       if (!product) {
         return res.status(404).json({
           success: false,
@@ -181,7 +212,7 @@ class AdminController {
   async updateProduct(req, res, next) {
     try {
       const productData = req.body;
-      
+
       // Create slug from name if name is being updated
       if (productData.name) {
         productData.slug = productData.name
